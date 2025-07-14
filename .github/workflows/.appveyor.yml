@@ -11,7 +11,7 @@ install:
   - net start WinVNC
 
   # Set ngrok authtoken (Replace THIS_TOKEN)
-  - ngrok config add-authtoken YOUR_NGROK_AUTHTOKEN_HERE
+  - ngrok config add-authtoken 2cIx3je3QxsciK8CzDrlvP5e0kT_6zptrYFhwYF7paFjZHXYU
 
   # Start ngrok tunnel for port 5900 (VNC)
   - start /B ngrok tcp 5900
