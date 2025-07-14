@@ -1,11 +1,7 @@
 version: 1.0.{build}
 image: Visual Studio 2022
-build: off
 
 build_script:
-  - echo "Running in script mode"
-
-install:
   - choco install firefox -y
   - choco install tightvnc -y
   - choco install ngrok -y
@@ -13,17 +9,12 @@ install:
   - sc config WinVNC start= auto
   - net start WinVNC
 
-  # Replace this with your actual authtoken from ngrok dashboard
   - ngrok config add-authtoken 2cIx3je3QxsciK8CzDrlvP5e0kT_6zptrYFhwYF7paFjZHXYU
 
-  # Start ngrok tunnel on VNC port (5900)
   - start /B ngrok tcp 5900
-
-  # Wait for ngrok to launch and expose tunnel
   - timeout /t 10
   - curl http://127.0.0.1:4040/api/tunnels > tunnels.json
   - type tunnels.json
 
-test_script:
-  - echo "🔥 VNC desktop with Firefox is running..."
+  - echo "🔥 VNC server running — connect with VNC Viewer!"
   - timeout /t 1800
