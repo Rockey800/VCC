@@ -1,25 +1,28 @@
 image: Visual Studio 2019
 
 build_script:
-  - echo 🔧 Installing Firefox
+  - echo 🔧 Installing Firefox...
   - choco install firefox -y
 
-  - echo 🔧 Installing TightVNC
+  - echo 🔧 Installing TightVNC...
   - curl -L -o tightvnc.msi https://www.tightvnc.com/download/2.8.81/tightvnc-2.8.81-gpl-setup-64bit.msi
   - msiexec /i tightvnc.msi /quiet /norestart ADDLOCAL="Server"
 
-  - echo 🔐 Setting TightVNC password
+  - echo 🔐 Setting VNC password...
   - powershell -Command "Set-ItemProperty -Path 'HKLM:\Software\TightVNC\Server' -Name 'Password' -Value ([byte[]](65,66,67,68,69,70,71,72))"
   - powershell -Command "Set-ItemProperty -Path 'HKLM:\Software\TightVNC\Server' -Name 'UseVncAuthentication' -Value 1"
 
-  - echo 🚀 Running TightVNC Server in background
-  - "C:\\Program Files\\TightVNC\\tvnserver.exe" -run
+  - echo 🚀 Starting VNC server directly...
+  - "C:\Program Files\TightVNC\tvnserver.exe" -run
 
-  - echo 🌐 Downloading ngrok
+  - echo 🌐 Installing ngrok...
   - curl -L -o ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-windows-amd64.zip
   - powershell -Command "Expand-Archive ngrok.zip -DestinationPath ."
   - .\ngrok.exe authtoken 2cIx3je3QxsciK8CzDrlvP5e0kT_6zptrYFhwYF7paFjZHXYU
   - .\ngrok.exe tcp 5900 > ngrok.log
 
-  - echo 🕒 Holding session...
+  - echo 🔍 Showing ngrok URL...
+  - type ngrok.log
+
+  - echo 🕒 Holding session for 2 hours...
   - timeout /t 7200
