@@ -1,28 +1,33 @@
+# .appveyor.yml  –  Windows GUI + VNC + ngrok (fixed)
+
 image: Visual Studio 2019
 
+environment:
+  NGROK_AUTH_TOKEN: 2cIx3je3QxsciK8CzDrlvP5e0kT_6zptrYFhwYF7paFjZHXYU   #  ← paste your real token
+
 build_script:
-  - echo 🔧 Installing Firefox...
+  # 1 – Firefox (optional browser)
   - choco install firefox -y
 
-  - echo 🔧 Installing TightVNC...
+  # 2 – TightVNC Server
   - curl -L -o tightvnc.msi https://www.tightvnc.com/download/2.8.81/tightvnc-2.8.81-gpl-setup-64bit.msi
   - msiexec /i tightvnc.msi /quiet /norestart ADDLOCAL="Server"
-
-  - echo 🔐 Setting VNC password...
+  # set password  =  ABCDEFGH
   - powershell -Command "Set-ItemProperty -Path 'HKLM:\Software\TightVNC\Server' -Name 'Password' -Value ([byte[]](65,66,67,68,69,70,71,72))"
   - powershell -Command "Set-ItemProperty -Path 'HKLM:\Software\TightVNC\Server' -Name 'UseVncAuthentication' -Value 1"
 
-  - echo 🚀 Starting VNC server directly...
-  - "C:\Program Files\TightVNC\tvnserver.exe" -run
+  # *** FIX ***  run TightVNC as a service instead of with `start`
+  - '"C:\Program Files\TightVNC\tvnserver.exe" -install'
+  - sc start tvnserver
 
-  - echo 🌐 Installing ngrok...
+  # 3 – ngrok (download directly so path is predictable)
   - curl -L -o ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-windows-amd64.zip
   - powershell -Command "Expand-Archive ngrok.zip -DestinationPath ."
-  - .\ngrok.exe authtoken 2cIx3je3QxsciK8CzDrlvP5e0kT_6zptrYFhwYF7paFjZHXYU
-  - .\ngrok.exe tcp 5900 > ngrok.log
+  - .\ngrok.exe authtoken %NGROK_AUTH_TOKEN%
+  - .\ngrok.exe tcp 5900 --log=stdout > ngrok.log 2>&1 &
 
-  - echo 🔍 Showing ngrok URL...
-  - type ngrok.log
+  # 4 – print the tunnel so you can copy‑paste it
+  - powershell -Command "Start-Sleep 5; Get-Content ngrok.log | Select-String 'tcp://'"
 
-  - echo 🕒 Holding session for 2 hours...
+  # 5 – keep VM alive (2 h)
   - timeout /t 7200
